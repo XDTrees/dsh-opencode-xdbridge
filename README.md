@@ -1,5 +1,6 @@
 # DSH OpenCode XD Bridge
 
+[![npm](https://img.shields.io/npm/v/dsh-opencode-xdbridge?style=flat-square&label=npm&color=cb3837)](https://www.npmjs.com/package/dsh-opencode-xdbridge)
 [![awesome · DSH plugin](https://awesome-dsh-plugin.com/badge.svg)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
 [![license](https://img.shields.io/github/license/XDTrees/dsh-opencode-xdbridge?style=flat-square)](LICENSE)
 
@@ -29,6 +30,14 @@ FreeTierError: OpenCode's free tier can only be used from within OpenCode
 > 权限必须是 `ask` 意味着"每个本地操作都要审批"。插件在本地把**所有审批请求全部拒绝**，所以运行时看起来像正常 OpenCode 会话（门禁放行），但**本地一个动作都不会执行**。真正执行的是 DSH。
 
 ## 安装
+
+**从 npm（推荐，最省事）**：
+
+```sh
+dsh plugin --profile <profile> add dsh-opencode-xdbridge
+```
+
+**从 GitHub 源码**：
 
 ```sh
 dsh plugin --profile <profile> add github:XDTrees/dsh-opencode-xdbridge
