@@ -55,7 +55,28 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\desktop\node_m
 # 3. 重启 DSH Desktop
 ```
 
-首次启动会下载约 60 MB 的官方 OpenCode 运行时（只下载一次，缓存在数据目录）。
+首次启动会下载约 57 MB 的官方 OpenCode 运行时（只下载一次，缓存在数据目录）。
+
+### 关于这次下载
+
+下载的是 OpenCode 官方二进制（`opencode-windows-x64` 这个 npm 包，57.4 MB）。它必须存在，因为免费模型的门禁只认真实 OpenCode 进程发出的请求——插件自身只有 71 KB，不含模型代码。
+
+下载被设计成**不会失败**，只会慢：
+
+- **断点续传**：已下载的部分会保留，中断后重启从断点继续，而不是从头再来。
+- **30 分钟总预算**：不再有单次请求的 5 分钟硬超时。
+- **多源**：优先 npm 官方 registry，取不到或太慢时自动改用本仓库 GitHub Release 上的同名包。
+- **完整性校验**：下载后比对 npm registry 发布的 sha512，不一致就丢弃重来——所以任何来源（包括镜像）都不可能让不同的代码被执行。
+
+如果确实很慢，可以自己下载一次并指给它，插件会直接复制而不联网：
+
+```sh
+# 方式一：把已装好的 opencode 指给它
+set OPENCODE_BINARY_PATH=C:\path\to\opencode.exe
+
+# 方式二：指定一个下载源
+set OPENCODE_XDBRIDGE_RUNTIME_URL=https://your-mirror/opencode-windows-x64-1.18.33.tgz
+```
 
 ## 使用
 
