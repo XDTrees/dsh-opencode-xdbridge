@@ -1,0 +1,116 @@
+## 打 tag 即发布到 npm；npm 通过 OIDC 信任本 workflow，因此不需要任何 token，
+## 也不需要两步验证码。绑定信息见同目录 README.md。
+##
+## 要点（改这个文件时别破坏）：
+##   - 文件名必须与 npm 侧「Workflow filename」一致：release.yml
+##   - id-token: write 是 OIDC 的唯一硬要求，删掉就退化成需要 token
+##   - registry-url 指向官方 registry（本机 .npmrc 默认是淘宝镜像，必须覆盖）
+##   - contents: write 是建 Release 需要的：GitHub Release 与 tag 是两回事
+##   - package-manager-cache: false —— 官方要求在发布构建里禁用缓存
+##     注意这是 setup-node v7 才有的输入：v4 上它不存在，会报
+##     "Unexpected input(s) 'package-manager-cache'" 并静默失效
+##   - action 版本要 v7/v6：v4 系列自身跑在 Node 20 上，GitHub 已弃用
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # 手动触发默认只跑构建+测试，不发版——这样可以拿它验证 CI 而不误发 npm。
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: '手动触发时也执行发布（默认只跑到测试）'
+        type: boolean
+        default: false
+      create_release:
+        description: '同时建 GitHub Release（作者会显示为 github-actions[bot]，仅作兜底）'
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write # OIDC：npm 据此确认「是本人授权的 workflow」
+  contents: write # 建 GitHub Release 需要写权限（只读会 403）
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Verify the tag matches package.json
+        # 只在 tag 推送时校验。手动触发时 GITHUB_REF_NAME 是分支名（main），
+        # 拿它跟版本号比必然不相等——那会让手动触发永远跑不下去。
+        if: github.event_name == 'push'
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          echo "package.json=$PKG_VERSION  tag=$TAG_VERSION"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Test
+        # 本插件零构建：客户端 bundle 是手写 CJS，由 scripts/build-client.mjs
+        # 包一层，产物已随仓库提交。所以这里只跑测试，不跑构建器。
+        run: |
+          node --version
+          npm test
+
+      - name: Verify the shipped client bundle is current
+        # lib/client.js 由 src/client/index.js 生成。若二者不同步，装到的
+        # 就是旧界面——这里把它变成一次发布失败，而不是一个静默的旧页面。
+        run: |
+          node scripts/build-client.mjs
+          if ! git diff --quiet -- lib/client.js; then
+            echo "::error::lib/client.js is stale — run 'npm run build' and commit the result"
+            git diff --stat -- lib/client.js
+            exit 1
+          fi
+
+      - name: Publish to npm
+        if: github.event_name == 'push' || inputs.publish
+        # OIDC 自动生效；npm CLI 会先尝试 OIDC，再回退到传统 token
+        run: npm publish --ignore-scripts --access public
+
+      - name: Create the GitHub release (opt-in)
+        # 默认**不在这里**建 Release，原因是身份：这一步只能用 GITHUB_TOKEN，
+        # 用它建出来的 Release 作者固定显示成 github-actions[bot]。本项目的
+        # Release 都用维护者本人身份建。
+        if: (github.event_name == 'push' || inputs.publish) && inputs.create_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          node -e '
+            const { readFileSync, writeFileSync } = require("node:fs")
+            const version = process.argv[1]
+            const lines = readFileSync("CHANGELOG.md", "utf8").split(/\r?\n/)
+            const at = lines.findIndex(l => l.startsWith("## " + version + " "))
+            if (at < 0) { console.error("no CHANGELOG section for " + version); process.exit(1) }
+            const heading = lines[at].slice(3).trim()
+            const rest = lines.slice(at + 1)
+            const end = rest.findIndex(l => l.startsWith("## "))
+            writeFileSync("release-body.md", (end < 0 ? rest : rest.slice(0, end)).join("\n").trim() + "\n")
+            const dash = heading.indexOf(" — ")
+            const subtitle = dash < 0 ? "" : heading.slice(dash + 3).trim()
+            writeFileSync("release-title.txt", subtitle === "" ? "v" + version : "v" + version + " — " + subtitle)
+          ' "$VERSION"
+          gh release create "v$VERSION" \
+            --title "$(cat release-title.txt)" \
+            --notes-file release-body.md \
+            --verify-tag

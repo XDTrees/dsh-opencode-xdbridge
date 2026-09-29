@@ -1,10 +1,13 @@
 # DSH OpenCode XD Bridge
 
+[![awesome · DSH plugin](https://awesome-dsh-plugin.com/badge.svg)](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)
+[![license](https://img.shields.io/github/license/XDTrees/dsh-opencode-xdbridge?style=flat-square)](LICENSE)
+
 在 DeepSeek Harness 里使用 **OpenCode Zen 的免费模型**。
 
 ## 这是什么
 
-把 [OpenCode](https://opencode.ai/) 的免费模型（big-pickle、LongCat、MiMo、Nemotron、Space Bunny 等）接进 DSH 的模型选择器，作为 `opencode-xdbridge` 分组使用，并在**设置 → OpenCode 免费模型**里提供一个可视化的交互入口。
+把 [OpenCode](https://opencode.ai/) 的免费模型（big-pickle、LongCat、MiMo、Nemotron、Space Bunny 等）接进 DSH 的模型选择器，作为 `opencode-xdbridge` 分组使用，并在**设置 → OpenCode-XD** 里提供一个可视化的交互入口。
 
 ## 为什么必须这么做
 
@@ -28,7 +31,7 @@ FreeTierError: OpenCode's free tier can only be used from within OpenCode
 ## 安装
 
 ```sh
-dsh plugin --profile <profile> add dsh-opencode-xdbridge
+dsh plugin --profile <profile> add github:XDTrees/dsh-opencode-xdbridge
 ```
 
 或者手动链接（开发用）：
@@ -49,7 +52,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\desktop\node_m
 
 重启后：
 
-1. **模型选择器**里会出现 **OpenCode 免费模型** 分组，直接选即可。
+1. **模型选择器**里会出现 **OpenCode 免费模型** 分组（provider 为 `opencode-xdbridge`），直接选即可。
 2. **设置 → OpenCode-XD** 是插件的交互面板（布局参考 OW Bridge 控制面板）。
 
 可用的模型随上游变化，插件每次启动都会重新读取。
