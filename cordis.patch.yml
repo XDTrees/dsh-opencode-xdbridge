@@ -1,0 +1,6 @@
+# Register the OpenCode Bridge provider. The plugin owns a managed, isolated
+# OpenCode runtime and exposes the free OpenCode Zen models it can reach as one
+# Harness model provider. Nothing here touches the user's own OpenCode install.
+- insert:
+    - id: llm-opencode-xdbridge
+      name: dsh-opencode-xdbridge

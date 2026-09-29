@@ -1,0 +1,15 @@
+# Normalize line endings to LF in the repository.
+#
+# Every file here was authored with LF. Without this, Git's Windows default
+# (`core.autocrlf=true`) rewrites them to CRLF in the working copy, which makes
+# a fresh clone differ from the committed tree and shows up as spurious diffs.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.exe binary
+*.tgz binary

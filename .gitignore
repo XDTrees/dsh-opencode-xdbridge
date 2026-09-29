@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+coverage/
+*.log
+.env
+.DS_Store
+
+# Local deployment backups (never commit these)
+_backup-*/
+*.bak-*
+
+# Scratch files used while diagnosing locally
+_*.txt
+_*.mjs

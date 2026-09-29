@@ -1,0 +1,76 @@
+{
+  "name": "dsh-opencode-xdbridge",
+  "version": "0.1.0",
+  "description": "Run OpenCode Zen's free models inside DeepSeek Harness through a managed, isolated OpenCode runtime.",
+  "license": "MIT",
+  "author": "aosi526",
+  "homepage": "https://github.com/aosi526/dsh-opencode-xdbridge#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aosi526/dsh-opencode-xdbridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aosi526/dsh-opencode-xdbridge/issues"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "test": "node --test \"test/*.test.js\" && node test/client-bundle.test.mjs && node test/client-render.test.mjs && node test/client-declaration.test.mjs",
+    "test:e2e": "node --test test/integration.test.js",
+    "test:smoke": "node test/apply-smoke.mjs && node test/harness-smoke.mjs && node test/probe-smoke.mjs"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.1.1-rc.1 <0.2.0"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "opencode",
+    "opencode-zen",
+    "free-models",
+    "model-provider"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-llm": ">=0.1.1-rc.1 <0.2.0",
+    "@deepseek-ai/dsh-llm-pi-ai": ">=0.1.1-rc.1 <0.2.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.1-rc.1 <0.2.0",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@earendil-works/pi-ai": ">=0.82.1 <0.86.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": { "optional": true },
+    "@deepseek-ai/dsh-llm": { "optional": true },
+    "@deepseek-ai/dsh-llm-pi-ai": { "optional": true },
+    "@deepseek-ai/dsh-settings": { "optional": true },
+    "@deepseek-ai/schemastery": { "optional": true },
+    "@earendil-works/pi-ai": { "optional": true }
+  }
+}
