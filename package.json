@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "description": "Run OpenCode Zen's free models inside DeepSeek Harness through a managed, isolated OpenCode runtime.",
   "license": "MIT",
-  "author": "aosi526",
-  "homepage": "https://github.com/aosi526/dsh-opencode-xdbridge#readme",
+  "author": "XDTrees",
+  "homepage": "https://github.com/XDTrees/dsh-opencode-xdbridge#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aosi526/dsh-opencode-xdbridge.git"
+    "url": "git+https://github.com/XDTrees/dsh-opencode-xdbridge.git"
   },
   "bugs": {
-    "url": "https://github.com/aosi526/dsh-opencode-xdbridge/issues"
+    "url": "https://github.com/XDTrees/dsh-opencode-xdbridge/issues"
   },
   "type": "module",
   "main": "lib/index.js",
