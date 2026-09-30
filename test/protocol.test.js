@@ -105,16 +105,28 @@ test('prepare refuses tool use on a chat-only model', () => {
   )
 })
 
-test('prepare rejects a reasoning effort the model does not expose', () => {
+test('prepare falls back when the model does not expose the requested reasoning effort', () => {
+  // This used to be a hard 400. Rejecting it made the model unusable for a
+  // client that simply prefers a level this model never declared, so an
+  // unusable level now falls back to the runtime's default instead.
   const withVariants = [model({ variants: { low: { reasoningEffort: 'low' } } })]
-  assert.throws(
-    () => prepare({
-      model: 'opencode/big-pickle',
-      messages: [{ role: 'user', content: 'hi' }],
-      reasoning_effort: 'high',
-    }, withVariants),
-    error => error.code === 'unsupported_reasoning_effort',
-  )
+  const request = prepare({
+    model: 'opencode/big-pickle',
+    messages: [{ role: 'user', content: 'hi' }],
+    reasoning_effort: 'high',
+  }, withVariants)
+  assert.notEqual(request.variant, 'high')
+  assert.equal(request.variant, undefined, 'an unexposed level must not become a variant')
+})
+
+test('prepare treats the Harness default "off" as no reasoning level', () => {
+  const withVariants = [model({ variants: { low: { reasoningEffort: 'low' } } })]
+  const request = prepare({
+    model: 'opencode/big-pickle',
+    messages: [{ role: 'user', content: 'hi' }],
+    reasoning_effort: 'off',
+  }, withVariants)
+  assert.equal(request.variant, undefined)
 })
 
 test('prepare accepts a declared reasoning effort', () => {
