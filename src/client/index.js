@@ -115,7 +115,8 @@ const zh = {
   'timing.request': '最近调用',
   'timing.ok': '响应',
   'timing.fail': '失败',
-  'detail.context': '上下文',
+  'detail.context': '可用上下文',
+  'detail.contextRaw': '声明',
   'detail.output': '输出上限',
   'detail.images': '图片输入',
   'detail.tools': '工具调用',
@@ -184,7 +185,8 @@ const en = {
   'timing.request': 'Last call',
   'timing.ok': 'ok',
   'timing.fail': 'failed',
-  'detail.context': 'Context',
+  'detail.context': 'Usable context',
+  'detail.contextRaw': 'declared',
   'detail.output': 'Output limit',
   'detail.images': 'Image input',
   'detail.tools': 'Tool calls',
@@ -366,6 +368,19 @@ function formatTime(ms) {
 }
 
 /**
+ * Format a token count compactly: 200K, 1.0M.
+ *
+ * The raw numbers are seven digits long, which crowds the detail row without
+ * telling the reader anything more than the rounded figure does.
+ */
+function formatTokens(tokens) {
+  if (!Number.isFinite(tokens)) return '—'
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`
+  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K`
+  return String(tokens)
+}
+
+/**
  * Rank a model for display: healthy first, unusable last, untested between.
  *
  * Mirrors the OW Bridge panel so a broken model never sits above a working one.
@@ -475,10 +490,16 @@ function ModelDetail({ model, t, locale }) {
   }
 
   const use = recommendedUse(model, locale)
+  // The advertised context is the usable budget, not the raw window: the
+  // difference is what stops the Harness from building a request the model
+  // cannot accept. Both numbers are shown so the gap is not a mystery.
+  const contextText = model.reportedContextWindow !== undefined && model.reportedContextWindow !== model.contextWindow
+    ? `${formatTokens(model.contextWindow)} / ${t('detail.contextRaw')} ${formatTokens(model.reportedContextWindow)}`
+    : formatTokens(model.contextWindow)
   const detail = [
     ...(use === '' ? [] : [{ text: `${t('detail.use')}：${use}` }]),
-    { text: `${t('detail.context')}：${model.contextWindow ?? '—'}` },
-    { text: `${t('detail.output')}：${model.maxOutputTokens ?? '—'}` },
+    { text: `${t('detail.context')}：${contextText}` },
+    { text: `${t('detail.output')}：${formatTokens(model.maxOutputTokens)}` },
     { text: `${t('detail.images')}：${model.supportsImages ? t('detail.yes') : t('detail.no')}` },
     { text: `${t('detail.tools')}：${model.supportsTools ? t('detail.yes') : t('detail.no')}` },
     {
