@@ -34,7 +34,7 @@
   ],
   "scripts": {
     "build": "node scripts/build-client.mjs",
-    "test": "node --test \"test/*.test.js\" && node test/client-bundle.test.mjs && node test/client-render.test.mjs && node test/client-declaration.test.mjs",
+    "test": "node --test \"test/*.test.js\" && node test/client-bundle.test.mjs && node test/client-render.test.mjs && node test/client-declaration.test.mjs && node test/proxy-default-check.mjs",
     "test:e2e": "node --test test/integration.test.js",
     "test:smoke": "node test/apply-smoke.mjs && node test/harness-smoke.mjs && node test/probe-smoke.mjs"
   },

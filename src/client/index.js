@@ -136,6 +136,7 @@ const zh = {
   'runtime.version': '运行时',
   'runtime.endpoint': '本地端点',
   'runtime.dataDir': '数据目录',
+  'runtime.proxy': '运行时代理',
   'feedback.refreshed': '已读取 {n} 个免费模型。',
   'feedback.probed': '检测完成：{ok} 个可用，{fail} 个不可用。',
   'feedback.restarted': '运行时已重启，共 {n} 个免费模型。',
@@ -206,6 +207,7 @@ const en = {
   'runtime.version': 'Runtime',
   'runtime.endpoint': 'Endpoint',
   'runtime.dataDir': 'Data dir',
+  'runtime.proxy': 'Runtime proxy',
   'feedback.refreshed': 'Read {n} free model(s).',
   'feedback.probed': 'Testing done: {ok} available, {fail} unusable.',
   'feedback.restarted': 'Runtime restarted with {n} free model(s).',
@@ -298,6 +300,7 @@ const CSS = `
 .dsm-ocxb-metric b{color:var(--dsw-alias-label-primary,#e6e6e6);font-size:20px;font-weight:600;line-height:1.2}
 .dsm-ocxb-metric span{color:var(--dsw-alias-label-tertiary,#999);font-size:12px;line-height:1.4}
 .dsm-ocxb-meta{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--dsw-alias-label-tertiary,#9aa0a8);word-break:break-all}
+.dsm-ocxb-meta-muted{opacity:.75}
 .dsm-ocxb-list{flex-direction:column;gap:6px;display:flex}
 /* One directory entry: the row plus, when open, its own detail panel directly
    beneath it. Keeping them in one item is what anchors the panel to the row. */
@@ -622,6 +625,12 @@ function BridgePage(props) {
       status !== null && h('div', { className: 'dsm-ocxb-meta' },
         status.runtimeVersion !== undefined && h('span', {}, `${t('runtime.version')}：OpenCode ${status.runtimeVersion}`),
         status.endpoint !== undefined && h('span', {}, `${t('runtime.endpoint')}：${status.endpoint}`),
+        // Which route the runtime's own upstream calls take. Without it, a
+        // proxied network the runtime did not inherit looks exactly like the
+        // upstream being down.
+        status.proxy !== undefined && h('span', {
+          className: status.proxy.configured ? undefined : 'dsm-ocxb-meta-muted',
+        }, `${t('runtime.proxy')}：${status.proxy.summary}`),
         status.dataDir !== '' && h('span', {}, `${t('runtime.dataDir')}：${status.dataDir}`))),
 
     feedback !== null && h('div', { className: `dsm-ocxb-feedback${feedback.error ? ' dsm-ocxb-feedback-error' : ''}` }, feedback.text),
