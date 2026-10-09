@@ -216,6 +216,21 @@ OpenCode Zen 免费模型
 | `src/client/index.js` | 设置页卡片（浏览器侧，手写 CJS） |
 | `scripts/build-client.mjs` | 把卡片包成宿主要求的模块加载器格式 |
 
+## 发布与收录
+
+对外发布涉及**三条各自独立、各自会失败**的通道：
+
+| 通道 | 由什么触发 | 详细说明 |
+| --- | --- | --- |
+| npm 包 | 推 `v*` tag → GitHub Actions（OIDC） | [`release/npm.md`](./release/npm.md) |
+| GitHub Release | 手动，维护者本人身份（运行时二进制的兜底源） | [`release/github-release.md`](./release/github-release.md) |
+| 插件商店 | 往 `awesome-dsh-plugin` 提 PR，**等维护者合并** | [`list/`](./list/) |
+
+发新版本的逐步操作见 [`release/checklist.md`](./release/checklist.md)。
+
+> 商店收录只是**发现渠道**。提了 PR 不等于会显示，但不影响安装——
+> `dsh plugin add dsh-opencode-xdbridge` 与 `dsh plugin add github:XDTrees/dsh-opencode-xdbridge` 都是现在就能用的。
+
 ## 安全设计
 
 - **隔离运行时**：独立的 XDG 根目录、随机服务密码、关闭自动更新/分享/项目配置；只转发常规系统与网络环境变量，**不读取也不写入**你自己 OpenCode 的配置、凭据和会话。
@@ -228,7 +243,7 @@ OpenCode Zen 免费模型
 
 ```sh
 npm run build        # 把 src/client/index.js 包成 lib/client.js
-npm test             # 单元测试（37 项）+ 客户端 bundle 校验，无需网络
+npm test             # 单元测试 + 四个独立校验（bundle / 渲染 / 声明 / 代理默认值），无需网络
 npm run test:smoke   # apply() 注册 + 真实 PiAiAdapter + 检测流程
 npm run test:e2e     # 端到端（需 OPENCODE_XDBRIDGE_E2E=1）
 ```
@@ -238,6 +253,8 @@ npm run test:e2e     # 端到端（需 OPENCODE_XDBRIDGE_E2E=1）
 ```sh
 node test/client-bundle.test.mjs        # 模拟宿主加载器，验证卡片注册与渲染
 node test/client-declaration.test.mjs   # 用宿主自己的代码校验 dsh.client 声明
+node test/proxy-default-check.mjs       # 静态断言：代理变量没被写回 FORWARDED_ENV
+node test/proxy-live.mjs                # 真实跑一次请求，验证运行时能到上游
 node test/apply-smoke.mjs               # 用桩 ctx 验证 apply() 注册与全部路由
 node test/harness-smoke.mjs             # 通过真实 PiAiAdapter 走一次 stream()
 node test/probe-smoke.mjs               # 真实跑一次模型检测
@@ -254,7 +271,8 @@ node test/profile-load-check.mjs        # 用 DSH 自己的 loader 校验 profil
 - **首次启动要下载**：约 60 MB，之后复用缓存。
 - **依赖 OpenCode 客户端接口**（不是官方开放 API），OpenCode 更新后插件可能需要跟着调整。
 - 免费额度被上游限流时，请求会失败并报出上游原始错误。
-- **包名含大写**：`dsh-opencode-xdbridge` 不符合 npm 的小写包名规范，因此只能本地链接安装，不能发布到 npm 用 `dsh plugin add` 安装。若需要 npm 分发，请把包名改成全小写。
+- **商店收录待维护者合并**：收录条目已提交（PR #6129），但插件商店需要对方点合并才会显示。这只影响「别人能不能搜到」，**不影响安装**——`dsh plugin add dsh-opencode-xdbridge` 现在就能用。详见 [`list/`](./list/)。
+- **界面显示名与包名不同**：包名必须全小写（`dsh-opencode-xdbridge`，npm 规范），设置页显示为 `OpenCode-XD` / `OpenCode-XDbridge`。
 
 ## 致谢
 

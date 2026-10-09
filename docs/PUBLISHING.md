@@ -1,8 +1,12 @@
 # 发布到 npm
 
+> 这份文档记录**首次发布**时踩过的坑，适合当背景读。
+> 日常发版的逐步操作在 [`../release/checklist.md`](../release/checklist.md)，
+> 发布通道/Release/商店收录的说明在 [`../release/`](../release/) 与 [`../list/`](../list/)。
+
 ## 现状
 
-包名 **`dsh-opencode-xdbridge`** 目前未被占用，可以注册。
+包名 **`dsh-opencode-xdbridge`** 已注册，已发布版本 **`0.1.0`**。
 
 发布通道采用 **npm Trusted Publishing（OIDC）**：GitHub Actions 打 tag 即发布，
 不需要在仓库里存任何 npm token，也不需要两步验证码。
@@ -10,7 +14,7 @@
 ## ⚠️ 关键限制：新包必须先手动发布一次
 
 **未发布的包在 npm 上还不存在，因此无法提前配置 Trusted Publisher。**
-所以顺序是固定的：
+所以顺序是固定的（首次发布时已按此执行）：
 
 ```
 第 1 步（一次性）：本地手动发布 → 包在 npm 上诞生
